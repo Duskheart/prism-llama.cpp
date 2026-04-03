@@ -21,18 +21,13 @@ cmake -B build && cmake --build build -j
 ```bash
 # Download the public Bonsai 1-bit models
 wget https://huggingface.co/prism-ml/Bonsai-8B-gguf/resolve/main/Bonsai-8B.gguf -O Bonsai-8B.gguf
-
-# Recode the model (requires python 3+)
-python3 requant_prism_gguf.py
-
-# Will create a new file: Bonsai-8B_patched.gguf
 ```
 
 ### Run the model
 ```bash
 # Llama cli
 ./build/bin/llama-cli \
-    -m Bonsai-8B_patched.gguf \
+    -m Bonsai-8B.gguf \
     -p "Explain quantum computing in simple terms." \
     -n 256 \
     --temp 0.5 \
@@ -42,7 +37,7 @@ python3 requant_prism_gguf.py
 
 # llama server
 ./build/bin/llama-server \
-    -m Bonsai-8B_patched.gguf \
+    -m Bonsai-8B.gguf \
     --host 0.0.0.0 \
     --port 8080 \
     -ngl 99

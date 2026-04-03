@@ -3987,8 +3987,8 @@ class GGMLQuantizationType(IntEnum):
     TQ2_0   = 35
     MXFP4   = 39
     NVFP4   = 40
-    Q1_0      = 41
-    Q1_0_g128 = 42
+    Q1_0_g128 = 41
+    Q1_0      = 42
 
 
 class ExpertGatingFuncType(IntEnum):
@@ -4042,8 +4042,8 @@ class LlamaFileType(IntEnum):
     MOSTLY_TQ2_0         = 37  # except 1d tensors
     MOSTLY_MXFP4_MOE     = 38  # except 1d tensors
     MOSTLY_NVFP4         = 39  # except 1d tensors
-    MOSTLY_Q1_0          = 40  # except 1d tensors
-    MOSTLY_Q1_0_g128     = 41  # except 1d tensors
+    MOSTLY_Q1_0_g128     = 40  # except 1d tensors
+    MOSTLY_Q1_0          = 41  # except 1d tensors
 
     GUESSED              = 1024  # not specified in the model file
 

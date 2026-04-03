@@ -22,6 +22,108 @@ vec2 dequantize(uint ib, uint iqs, uint a_offset) {
 }
 #endif
 
+#if defined(DATA_A_Q1_0)
+vec2 dequantize(uint ib, uint iqs, uint a_offset) {
+    const float d = float(data_a[a_offset + ib].d);
+    const uint byte_idx0 = iqs / 8;
+    const uint bit_idx0 = iqs % 8;
+    const uint byte_idx1 = (iqs + 1) / 8;
+    const uint bit_idx1 = (iqs + 1) % 8;
+    const uint vui0 = uint(data_a[a_offset + ib].qs[byte_idx0]);
+    const uint vui1 = uint(data_a[a_offset + ib].qs[byte_idx1]);
+    const int bit0 = int((vui0 >> bit_idx0) & 1);
+    const int bit1 = int((vui1 >> bit_idx1) & 1);
+    return vec2(d * float(2 * bit0 - 1), d * float(2 * bit1 - 1));
+}
+vec4 dequantize4(uint ib, uint iqs, uint a_offset) {
+    const uint word_idx0 = iqs / 16;
+    const uint bit_idx0 = iqs % 16;
+
+    if (bit_idx0 <= 12) {
+        const uint vui = uint(data_a_packed16[a_offset + ib].qs[word_idx0]);
+        const int bit0 = int((vui >> (bit_idx0 + 0)) & 1);
+        const int bit1 = int((vui >> (bit_idx0 + 1)) & 1);
+        const int bit2 = int((vui >> (bit_idx0 + 2)) & 1);
+        const int bit3 = int((vui >> (bit_idx0 + 3)) & 1);
+        return vec4(
+            float(2 * bit0 - 1),
+            float(2 * bit1 - 1),
+            float(2 * bit2 - 1),
+            float(2 * bit3 - 1)
+        );
+    } else {
+        const uint vui0 = uint(data_a_packed16[a_offset + ib].qs[word_idx0]);
+        const uint vui1 = uint(data_a_packed16[a_offset + ib].qs[word_idx0 + 1]);
+        int bits[4];
+        for (int i = 0; i < 4; i++) {
+            uint bit_pos = bit_idx0 + uint(i);
+            if (bit_pos < 16) {
+                bits[i] = int((vui0 >> bit_pos) & 1);
+            } else {
+                bits[i] = int((vui1 >> (bit_pos - 16)) & 1);
+            }
+        }
+        return vec4(
+            float(2 * bits[0] - 1),
+            float(2 * bits[1] - 1),
+            float(2 * bits[2] - 1),
+            float(2 * bits[3] - 1)
+        );
+    }
+}
+#endif
+
+#if defined(DATA_A_Q1_0_G128)
+vec2 dequantize(uint ib, uint iqs, uint a_offset) {
+    const float d = float(data_a[a_offset + ib].d);
+    const uint byte_idx0 = iqs / 8;
+    const uint bit_idx0 = iqs % 8;
+    const uint byte_idx1 = (iqs + 1) / 8;
+    const uint bit_idx1 = (iqs + 1) % 8;
+    const uint vui0 = uint(data_a[a_offset + ib].qs[byte_idx0]);
+    const uint vui1 = uint(data_a[a_offset + ib].qs[byte_idx1]);
+    const int bit0 = int((vui0 >> bit_idx0) & 1);
+    const int bit1 = int((vui1 >> bit_idx1) & 1);
+    return vec2(d * float(2 * bit0 - 1), d * float(2 * bit1 - 1));
+}
+vec4 dequantize4(uint ib, uint iqs, uint a_offset) {
+    const uint word_idx0 = iqs / 16;
+    const uint bit_idx0 = iqs % 16;
+
+    if (bit_idx0 <= 12) {
+        const uint vui = uint(data_a_packed16[a_offset + ib].qs[word_idx0]);
+        const int bit0 = int((vui >> (bit_idx0 + 0)) & 1);
+        const int bit1 = int((vui >> (bit_idx0 + 1)) & 1);
+        const int bit2 = int((vui >> (bit_idx0 + 2)) & 1);
+        const int bit3 = int((vui >> (bit_idx0 + 3)) & 1);
+        return vec4(
+            float(2 * bit0 - 1),
+            float(2 * bit1 - 1),
+            float(2 * bit2 - 1),
+            float(2 * bit3 - 1)
+        );
+    } else {
+        const uint vui0 = uint(data_a_packed16[a_offset + ib].qs[word_idx0]);
+        const uint vui1 = uint(data_a_packed16[a_offset + ib].qs[word_idx0 + 1]);
+        int bits[4];
+        for (int i = 0; i < 4; i++) {
+            uint bit_pos = bit_idx0 + uint(i);
+            if (bit_pos < 16) {
+                bits[i] = int((vui0 >> bit_pos) & 1);
+            } else {
+                bits[i] = int((vui1 >> (bit_pos - 16)) & 1);
+            }
+        }
+        return vec4(
+            float(2 * bits[0] - 1),
+            float(2 * bits[1] - 1),
+            float(2 * bits[2] - 1),
+            float(2 * bits[3] - 1)
+        );
+    }
+}
+#endif
+
 #if defined(DATA_A_Q4_0)
 vec2 dequantize(uint ib, uint iqs, uint a_offset) {
     const uint vui = uint(data_a[a_offset + ib].qs[iqs]);
@@ -448,7 +550,7 @@ vec2 get_dm(uint ib, uint a_offset) {
 }
 #endif
 
-#if defined(DATA_A_Q4_0) || defined(DATA_A_Q5_0) || defined(DATA_A_Q8_0) || defined(DATA_A_IQ1_S) || defined(DATA_A_IQ2_XXS) || defined(DATA_A_IQ2_XS) || defined(DATA_A_IQ2_S) || defined(DATA_A_IQ3_XXS) || defined(DATA_A_IQ3_S) || defined(DATA_A_IQ4_XS) || defined(DATA_A_IQ4_NL)
+#if defined(DATA_A_Q1_0) || defined(DATA_A_Q1_0_G128) || defined(DATA_A_Q4_0) || defined(DATA_A_Q5_0) || defined(DATA_A_Q8_0) || defined(DATA_A_IQ1_S) || defined(DATA_A_IQ2_XXS) || defined(DATA_A_IQ2_XS) || defined(DATA_A_IQ2_S) || defined(DATA_A_IQ3_XXS) || defined(DATA_A_IQ3_S) || defined(DATA_A_IQ4_XS) || defined(DATA_A_IQ4_NL)
 vec2 get_dm(uint ib, uint a_offset) {
     return vec2(float(data_a[a_offset + ib].d), 0);
 }

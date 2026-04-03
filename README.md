@@ -1,3 +1,12 @@
+> **Note: prism-android branch (experimental)**
+>
+> This branch adds experimental OpenCL and Vulkan compute kernels for Q1_0 and Q1_0_g128
+> (1-bit quantization). These kernels are provided for testing and reference only -- they
+> likely contain bugs and have only been validated on a limited set of hardware (Adreno 830)
+> and models. Text generation (token-by-token inference) has been verified correct for some
+> models; batch prompt processing may produce incorrect results depending on model architecture.
+> Use at your own risk.
+
 # llama.cpp
 
 ![llama](https://user-images.githubusercontent.com/1991296/230134379-7181e485-c521-4d23-a0d6-f7b3b61ba524.png)

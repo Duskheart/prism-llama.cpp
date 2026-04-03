@@ -45,6 +45,60 @@ void load_a_to_shmem(const uint pos_a, const uint row, const uint col, const uin
                 buf_a[buf_idx] = FLOAT_TYPE_VEC2(0.0f);
             }
 #endif
+#elif defined(DATA_A_Q1_0)
+            const uint idx = pos_a + col * p.stride_a / LOAD_VEC_A + row;
+            const uint buf_idx = col * SHMEM_STRIDE + row * LOAD_VEC_A / 2;
+
+            const uint ib = idx / 4;
+            const uint iqs = idx & 0x03;
+
+            const float d = float(data_a[ib].d);
+            const uint byte_val = uint(data_a[ib].qs[iqs]);
+
+            vec4 v0 = vec4(
+                ((byte_val >> 0) & 1u) != 0u ? d : -d,
+                ((byte_val >> 1) & 1u) != 0u ? d : -d,
+                ((byte_val >> 2) & 1u) != 0u ? d : -d,
+                ((byte_val >> 3) & 1u) != 0u ? d : -d
+            );
+            vec4 v1 = vec4(
+                ((byte_val >> 4) & 1u) != 0u ? d : -d,
+                ((byte_val >> 5) & 1u) != 0u ? d : -d,
+                ((byte_val >> 6) & 1u) != 0u ? d : -d,
+                ((byte_val >> 7) & 1u) != 0u ? d : -d
+            );
+
+            buf_a[buf_idx    ] = FLOAT_TYPE_VEC2(v0.xy);
+            buf_a[buf_idx + 1] = FLOAT_TYPE_VEC2(v0.zw);
+            buf_a[buf_idx + 2] = FLOAT_TYPE_VEC2(v1.xy);
+            buf_a[buf_idx + 3] = FLOAT_TYPE_VEC2(v1.zw);
+#elif defined(DATA_A_Q1_0_G128)
+            const uint idx = pos_a + col * p.stride_a / LOAD_VEC_A + row;
+            const uint buf_idx = col * SHMEM_STRIDE + row * LOAD_VEC_A / 2;
+
+            const uint ib = idx / 16;
+            const uint iqs = idx & 0x0F;
+
+            const float d = float(data_a[ib].d);
+            const uint byte_val = uint(data_a[ib].qs[iqs]);
+
+            vec4 v0 = vec4(
+                ((byte_val >> 0) & 1u) != 0u ? d : -d,
+                ((byte_val >> 1) & 1u) != 0u ? d : -d,
+                ((byte_val >> 2) & 1u) != 0u ? d : -d,
+                ((byte_val >> 3) & 1u) != 0u ? d : -d
+            );
+            vec4 v1 = vec4(
+                ((byte_val >> 4) & 1u) != 0u ? d : -d,
+                ((byte_val >> 5) & 1u) != 0u ? d : -d,
+                ((byte_val >> 6) & 1u) != 0u ? d : -d,
+                ((byte_val >> 7) & 1u) != 0u ? d : -d
+            );
+
+            buf_a[buf_idx    ] = FLOAT_TYPE_VEC2(v0.xy);
+            buf_a[buf_idx + 1] = FLOAT_TYPE_VEC2(v0.zw);
+            buf_a[buf_idx + 2] = FLOAT_TYPE_VEC2(v1.xy);
+            buf_a[buf_idx + 3] = FLOAT_TYPE_VEC2(v1.zw);
 #elif defined(DATA_A_Q4_0)
             const uint idx = pos_a + col * p.stride_a / LOAD_VEC_A + row;
             const uint buf_idx = col * SHMEM_STRIDE + row * LOAD_VEC_A / 4;

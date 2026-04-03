@@ -13,6 +13,41 @@ float16_t dequantFuncF32(const in decodeBufF32 bl, const in uint blockCoords[2],
     return vf16[idx];
 }
 
+layout(buffer_reference, std430, buffer_reference_align = 2) buffer decodeBufQ1_0 {
+   block_q1_0_packed16 block;
+};
+
+float16_t dequantFuncQ1_0(const in decodeBufQ1_0 bl, const in uint blockCoords[2], const in uint coordInBlock[2])
+{
+    const float16_t d = bl.block.d;
+    const uint idx = coordInBlock[1];
+    const uint byte_idx = idx >> 3;
+    const uint bit_idx = idx & 7;
+    const uint byte_val = unpack8(uint32_t(bl.block.qs[(byte_idx & 0x1E) >> 1]))[byte_idx & 1];
+    const uint bit = (byte_val >> bit_idx) & 1u;
+    const float16_t weight = d * float16_t(int(bit) * 2 - 1);
+    return weight;
+}
+
+layout(buffer_reference, std430, buffer_reference_align = 2) buffer decodeBufQ1_0_g128 {
+   block_q1_0_g128_packed16 block;
+};
+
+float16_t dequantFuncQ1_0_g128(const in decodeBufQ1_0_g128 bl, const in uint blockCoords[2], const in uint coordInBlock[2])
+{
+    const float16_t d = bl.block.d;
+    const uint idx = coordInBlock[1];
+    const uint byte_idx = idx >> 3;
+    const uint bit_idx = idx & 7;
+    const uint byte_val = unpack8(uint32_t(bl.block.qs[(byte_idx & 0x1E) >> 1]))[byte_idx & 1];
+    const uint bit = (byte_val >> bit_idx) & 1u;
+    const float16_t weight = d * float16_t(int(bit) * 2 - 1);
+    return weight;
+}
+
+#define dequantFuncQ1_0_G128 dequantFuncQ1_0_g128
+#define decodeBufQ1_0_G128 decodeBufQ1_0_g128
+
 layout(buffer_reference, std430, buffer_reference_align = 2) buffer decodeBufQ4_0 {
    block_q4_0_packed16 block;
 };
@@ -685,7 +720,11 @@ float16_t dequantFuncMXFP4(const in decodeBufMXFP4 bl, const in uint blockCoords
 }
 #endif
 
-#if defined(DATA_A_Q4_0)
+#if defined(DATA_A_Q1_0)
+#define dequantFuncA dequantFuncQ1_0
+#elif defined(DATA_A_Q1_0_G128)
+#define dequantFuncA dequantFuncQ1_0_G128
+#elif defined(DATA_A_Q4_0)
 #define dequantFuncA dequantFuncQ4_0
 #elif defined(DATA_A_Q4_1)
 #define dequantFuncA dequantFuncQ4_1

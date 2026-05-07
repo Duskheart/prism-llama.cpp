@@ -1,3 +1,49 @@
+> [!IMPORTANT]
+> This is a fork of the [Prism-ML fork of llama.cpp](https://github.com/PrismML-Eng/llama.cpp) that is synced to the main llama.cpp repo
+> It is not yet ready for production use and should be considered experimental
+> 
+> The primary benefit of this fork is an up-to-date version of llama.cpp that also merges the capabiilities of the Prism-ML fork
+> to support the [Bonsai 1-bit models](https://huggingface.co/prism-ml/Bonsai-8B-gguf)
+>
+> Note: this is not an official fork and is not supported by the Prism-ML team - this is just a personal fork to demo Bonsai until official support is added
+
+
+## How to use this fork
+
+```bash
+# On MacOS
+git clone https://github.com/Mintplex-Labs/prism-ml-llama.cpp
+cd prism-ml-llama.cpp
+cmake -B build && cmake --build build -j
+```
+
+### You __must__ recode the public Bonsai 1-bit models to work with this fork
+```bash
+# Download the public Bonsai 1-bit models
+wget https://huggingface.co/prism-ml/Bonsai-8B-gguf/resolve/main/Bonsai-8B.gguf -O Bonsai-8B.gguf
+```
+
+### Run the model
+```bash
+# Llama cli
+./build/bin/llama-cli \
+    -m Bonsai-8B.gguf \
+    -p "Explain quantum computing in simple terms." \
+    -n 256 \
+    --temp 0.5 \
+    --top-p 0.85 \
+    --top-k 20 \
+    -ngl 99
+
+# llama server
+./build/bin/llama-server \
+    -m Bonsai-8B.gguf \
+    --host 0.0.0.0 \
+    --port 8080 \
+    -ngl 99
+    --ctx-size 65536
+```
+
 # llama.cpp
 
 ![llama](https://user-images.githubusercontent.com/1991296/230134379-7181e485-c521-4d23-a0d6-f7b3b61ba524.png)

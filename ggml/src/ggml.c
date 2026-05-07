@@ -53,6 +53,21 @@
 
 #define UNUSED GGML_UNUSED
 
+uint64_t ggml_graph_next_uid(void) {
+#ifdef _MSC_VER
+#if defined(_WIN32)
+    static volatile LONG counter = 1;
+    return (uint64_t) InterlockedIncrement(&counter) - 1;
+#else
+    static volatile long long counter = 1;
+    return (uint64_t) _InterlockedIncrement64(&counter) - 1;
+#endif
+#else
+    static uint64_t counter = 1;
+    return __atomic_fetch_add(&counter, 1, __ATOMIC_RELAXED);
+#endif
+}
+
 // Needed for ggml_fp32_to_bf16_row()
 #if defined(__AVX512BF16__)
 #if defined(_MSC_VER)
@@ -3256,6 +3271,16 @@ void ggml_mul_mat_set_prec(
     const int32_t prec_i32 = (int32_t) prec;
 
     ggml_set_op_params_i32(a, 0, prec_i32);
+}
+
+void ggml_mul_mat_set_hint(
+        struct ggml_tensor * a,
+        enum ggml_op_hint    hint) {
+    GGML_ASSERT(a->op == GGML_OP_MUL_MAT);
+
+    const int32_t hint_i32 = (int32_t) hint;
+
+    ggml_set_op_params_i32(a, 1, hint_i32);
 }
 
 // ggml_mul_mat_id
@@ -7107,6 +7132,7 @@ struct ggml_cgraph * ggml_new_graph_custom(struct ggml_context * ctx, size_t siz
         /*.use_counts   =*/ use_counts_ptr,
         /*.hash_table   =*/ { hash_size, hash_used, hash_keys_ptr },
         /*.order        =*/ GGML_CGRAPH_EVAL_ORDER_LEFT_TO_RIGHT,
+        /*.uid          =*/ 0,
     };
 
     ggml_hash_set_reset(&cgraph->visited_hash_set);
@@ -7134,6 +7160,7 @@ struct ggml_cgraph ggml_graph_view(struct ggml_cgraph * cgraph0, int i0, int i1)
         /*.use_counts       =*/ cgraph0->use_counts,
         /*.visited_hash_set =*/ cgraph0->visited_hash_set,
         /*.order            =*/ cgraph0->order,
+        /*.uid              =*/ 0
     };
 
     return cgraph;
@@ -7653,7 +7680,7 @@ size_t ggml_quantize_chunk(
                int64_t   nrows,
                int64_t   n_per_row,
            const float * imatrix) {
-    const int64_t n = (int64_t) nrows * n_per_row;
+    const int64_t n = nrows * n_per_row;
 
     if (ggml_quantize_requires_imatrix(type)) {
         GGML_ASSERT(imatrix != NULL);
@@ -7750,9 +7777,9 @@ struct ggml_threadpool_params ggml_threadpool_params_default(int n_threads) {
 }
 
 bool ggml_threadpool_params_match(const struct ggml_threadpool_params * p0, const struct ggml_threadpool_params * p1) {
-    if (p0->n_threads      != p1->n_threads  )    return false;
-    if (p0->prio           != p1->prio       )    return false;
-    if (p0->poll           != p1->poll       )    return false;
-    if (p0->strict_cpu     != p1->strict_cpu )    return false;
+    if (p0->n_threads  != p1->n_threads  ) return false;
+    if (p0->prio       != p1->prio       ) return false;
+    if (p0->poll       != p1->poll       ) return false;
+    if (p0->strict_cpu != p1->strict_cpu ) return false;
     return memcmp(p0->cpumask, p1->cpumask, GGML_MAX_N_THREADS) == 0;
 }

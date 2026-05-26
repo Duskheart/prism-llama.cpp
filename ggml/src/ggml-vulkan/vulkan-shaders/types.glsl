@@ -204,6 +204,22 @@ struct block_q1_0
 #define A_TYPE block_q1_0
 #endif
 
+#define QUANT_K_Q1_0_G128 128
+#define QUANT_R_Q1_0_G128 1
+
+struct block_q1_0_g128
+{
+    float16_t d;
+    uint8_t qs[QUANT_K_Q1_0_G128 / 8];
+};
+
+#if defined(DATA_A_Q1_0_G128)
+#define QUANT_K QUANT_K_Q1_0_G128
+#define QUANT_R QUANT_R_Q1_0_G128
+#define QUANT_AUXF 1
+#define A_TYPE block_q1_0_g128
+#endif
+
 #define QUANT_K_Q8_1 32
 #define QUANT_R_Q8_1 1
 

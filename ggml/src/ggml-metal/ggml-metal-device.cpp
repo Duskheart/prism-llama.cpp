@@ -757,6 +757,16 @@ ggml_metal_pipeline_with_params ggml_metal_library_get_pipeline_mul_mv(ggml_meta
                     suffix = ne00 % 4 == 0 ? "_4" : "";
                 }
             } break;
+        case GGML_TYPE_Q1_0:
+            {
+                nsg = N_SG_Q1_0;
+                nr0 = N_R0_Q1_0;
+            } break;
+        case GGML_TYPE_Q2_0:
+            {
+                nsg = N_SG_Q2_0;
+                nr0 = N_R0_Q2_0;
+            } break;
         case GGML_TYPE_Q4_0:
             {
                 nsg = N_SG_Q4_0;
@@ -968,6 +978,16 @@ ggml_metal_pipeline_with_params ggml_metal_library_get_pipeline_mul_mv_id(ggml_m
                 nr1 = 1;
                 smem = 32*sizeof(float)*nr0;
                 suffix = ne00 % 4 == 0 ? "_4" : "";
+            } break;
+        case GGML_TYPE_Q1_0:
+            {
+                nsg = N_SG_Q1_0;
+                nr0 = N_R0_Q1_0;
+            } break;
+        case GGML_TYPE_Q2_0:
+            {
+                nsg = N_SG_Q2_0;
+                nr0 = N_R0_Q2_0;
             } break;
         case GGML_TYPE_Q4_0:
             {

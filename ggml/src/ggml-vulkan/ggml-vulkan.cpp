@@ -3100,8 +3100,10 @@ static vk_fa_tuning_params get_fa_tuning_params(const vk_device& device, uint32_
         path = FA_SCALAR;
     }
 
-    // Q1_0 K/V is only implemented on coopmat2 (flash_attn_cm2); there is no scalar FA shader for it.
-    if ((k_type == GGML_TYPE_Q1_0 || v_type == GGML_TYPE_Q1_0 || k_type == GGML_TYPE_Q1_0_g128 || v_type == GGML_TYPE_Q1_0_g128) && device->coopmat2) {
+    // Q1_0/Q2_0 K/V is only implemented on coopmat2 (flash_attn_cm2); there is no scalar FA shader for them.
+    if ((k_type == GGML_TYPE_Q1_0 || v_type == GGML_TYPE_Q1_0 ||
+         k_type == GGML_TYPE_Q1_0_g128 || v_type == GGML_TYPE_Q1_0_g128 ||
+         k_type == GGML_TYPE_Q2_0 || v_type == GGML_TYPE_Q2_0) && device->coopmat2) {
         path = FA_COOPMAT2;
     }
 
@@ -15714,6 +15716,7 @@ static bool ggml_backend_vk_device_supports_op(ggml_backend_dev_t dev, const ggm
                         return true;
                     case GGML_TYPE_Q1_0:
                     case GGML_TYPE_Q1_0_g128:
+                    case GGML_TYPE_Q2_0:
                         return coopmat2;
                     default:
                         return false;
